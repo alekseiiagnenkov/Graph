@@ -3,20 +3,21 @@
 #include <vector>
 #include <string>
 
-typedef struct Vertex* ptrVert;
 using namespace std;
 
+template < typename T >
 struct Vertex {
-    int key;
+    T key;
     int color;
-    vector<Vertex*> adjacent_vertexes;
+    vector<Vertex<T>*> adjacent_vertexes;
 };
 
+template < class T >
 class Graph {
 private:
     int size_;
 
-    ptrVert* vertexes_;
+    Vertex<T>** vertexes_;
 
     void add_vertex(int);
 
@@ -28,6 +29,14 @@ private:
 
 public:
     Graph();
+
+    int get_size() { return this->size_; };
+
+    Vertex<T>** get_vertexes() { return this->vertexes_; }
+
+    void set_size(int size) { this->size_ = size; }
+
+    void set_vertexes(Vertex<T>** vertexes) { this->vertexes_ = vertexes; }
 
     void create_graph();
 
