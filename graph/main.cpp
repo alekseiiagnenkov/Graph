@@ -2,12 +2,12 @@
 
 int main() {
     try {
-        Graph<int> G;
-        //G.create_graph();
-        //G.initialization_vertexes();
-        //G.print_graph();
-        //G.color_graph();
-        //G.print_color();
+        Graph<string> G;
+        G.create_graph();
+        G.initialization_vertexes();
+        G.print_graph();
+        G.color_graph();
+        G.print_color();
     }
     catch (const std::exception& ex) {
         std::cout << ex.what() << std::endl;
