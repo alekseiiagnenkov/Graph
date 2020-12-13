@@ -2,12 +2,13 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <time.h>
 
 using namespace std;
 
 template < typename T >
 struct Vertex {
-    T key;
+    T name;
     int color;
     vector<Vertex<T>*> adjacent_vertexes;
 };
@@ -19,7 +20,7 @@ private:
 
     Vertex<T>** vertexes_;
 
-    void add_vertex(int);
+    void add_vertex(int, bool);
 
     bool find(int, int);
 
@@ -27,8 +28,12 @@ private:
 
     bool find_color(int, int);
 
+    bool find_name(T);
+
 public:
     Graph();
+
+    Graph(int, bool);
 
     int get_size() { return this->size_; };
 
@@ -40,17 +45,27 @@ public:
 
     void create_graph();
 
-    void initialization_vertexes();
+    void initialization_vertexes(bool);
 
     void print_graph();
 
     void color_graph();
 
     void print_color();
+
+    void clear_graph();
 };
 
 template < class T >
 Graph<T>::Graph() : size_(0), vertexes_(nullptr) {}
+
+template < class T >
+Graph<T>::Graph(int size, bool timing) {
+    this->size_ = size;
+    this->vertexes_ = new Vertex<T> * [this->size_];
+    for (int i = 0; i < size_; i++) this->vertexes_[i] = nullptr;
+    for (int i = 0; i < size_; i++) add_vertex(i, timing);
+}
 
 template < class T >
 void Graph<T>::create_graph() {
@@ -60,42 +75,74 @@ void Graph<T>::create_graph() {
         cout << endl;
     } while (this->size_ < 0);
     this->vertexes_ = new Vertex<T> * [this->size_];
-    for (int i = 0; i < size_; i++) add_vertex(i);
+    for (int i = 0; i < size_; i++) this->vertexes_[i] = nullptr;
+    for (int i = 0; i < size_; i++) add_vertex(i, false);
 }
 
 template < class T >
-void Graph<T>::add_vertex(int i) {
+void Graph<T>::add_vertex(int i, bool timing) {
+    srand(time(0));
     Vertex<T>* vert = new Vertex<T>;
-    cout << "Print key/name to [" << i << "] vertex: ";
-    cin >> vert->key;
-    cout << endl;
+    if (timing) {
+        do {
+            vert->name = rand() % 1000 * rand() % 1000;
+        } while (this->find_name(vert->name));
+    }
+    else {
+        do {
+            cout << "Print key/name to [" << i << "] vertex: ";
+            cin >> vert->name;
+            cout << endl;
+        } while (this->find_name(vert->name));
+    }
     vert->color = -1;
     this->vertexes_[i] = vert;
 }
 
 template < class T >
-void Graph<T>::initialization_vertexes() {
+bool Graph<T>::find_name(T name) {
+    for (int i = 0; i < this->size_; i++) {
+        if (this->vertexes_[i]) {
+            if (this->vertexes_[i]->name == name)
+                return true;
+        }
+        else
+            break;
+    }
+    return false;
+}
+
+template < class T >
+void Graph<T>::initialization_vertexes(bool timing) {
+    srand(time(0));
     int j = -1;
     string strVertexes;
     for (int i = 0; i < this->size_; i++) {
-        do {
-            if (j != -1)
-                cout << "Enter vertexes adjacent to [" << i << "] vertex: ";
-            getline(cin, strVertexes);
-            j = 0;
-        } while (int(strVertexes.size()) == 0);
-        for (int a = int(strVertexes.size()) - 1; a >= 0; a--)
-            if (strVertexes[a] == ' ')
-                strVertexes.pop_back();
-            else {
-                j = (strVertexes[a]) - '0';
-                if (j >= this->size_)
-                    throw std::exception();
-                make_communication(i, j);
-                strVertexes.pop_back();
-            }
-        strVertexes.clear();
-        cout << endl;
+        if (timing) {
+            int size = (rand() % this->size_ * rand() % this->size_) % (this->size_-1)%(this->size_/2);
+            for(int k=0; k<size-1; k++)
+                make_communication(i, rand()%(this->size_-1));
+        }
+        else {
+            do {
+                if (j != -1)
+                    cout << "Enter vertexes adjacent to [" << i << "] vertex: ";
+                getline(cin, strVertexes);
+                j = 0;
+            } while (int(strVertexes.size()) == 0);
+            for (int a = int(strVertexes.size()) - 1; a >= 0; a--)
+                if (strVertexes[a] == ' ')
+                    strVertexes.pop_back();
+                else {
+                    j = (strVertexes[a]) - '0';
+                    if (j >= this->size_)
+                        throw std::exception();
+                    make_communication(i, j);
+                    strVertexes.pop_back();
+                }
+            strVertexes.clear();
+            cout << endl;
+        }
     }
 }
 
@@ -143,17 +190,16 @@ template < class T >
 void Graph<T>::print_graph() {
     cout << "   [GRAPH]" << endl;
     for (int i = 0; i < this->size_; i++) {
-        cout << "{ing[" << i << "], name[" << vertexes_[i]->key << "]} - ";
+        cout << "{ing[" << i << "], name[" << vertexes_[i]->name << "]} - ";
 
         for (int j = 0; j < this->vertexes_[i]->adjacent_vertexes.size(); j++) {
             if (j != 0)
                 cout << ", ";
-            cout << "name[" << this->vertexes_[i]->adjacent_vertexes[j]->key << "]";
+            cout << "name[" << this->vertexes_[i]->adjacent_vertexes[j]->name << "]";
         }
         cout << endl;
     }
 }
-
 
 template < class T >
 void Graph<T>::print_color() {
@@ -161,6 +207,13 @@ void Graph<T>::print_color() {
     cout << "  [COLORS]" << endl;
     for (int i = 0; i < this->size_; i++)
         if (vertexes_[i] != nullptr) {
-            cout << "Color {ind[" << i << "], name["<< vertexes_[i]->key <<"]} - " << vertexes_[i]->color << endl;
+            cout << "Color {ind[" << i << "], name["<< vertexes_[i]->name <<"]} - " << vertexes_[i]->color << endl;
         }
+}
+
+template < class T >
+void Graph<T>::clear_graph() {
+    for (int i = 0; i < this->size_; i++) {
+        delete this->vertexes_[i];
+    }
 }
