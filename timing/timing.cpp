@@ -4,7 +4,7 @@ int main(){
 	srand(time(nullptr));
 	clock_t first, last;
 	int number = 10;//кол-во опытов
-	int size = 50; //размер графа
+	int size = 25; //размер графа
 	for (int i = 1; i <= number; i++) {
 		Graph<int> G(size * i, true);
 		G.initialization_vertexes(true);

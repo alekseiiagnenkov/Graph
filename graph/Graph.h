@@ -18,7 +18,7 @@ class Graph {
 private:
     int size_;
 
-    Vertex<T>** vertexes_;
+    vector<Vertex<T>*> vertexes_;
 
     void add_vertex(int, bool);
 
@@ -37,11 +37,26 @@ public:
 
     int get_size() { return this->size_; };
 
-    Vertex<T>** get_vertexes() { return this->vertexes_; }
+    vector<Vertex<T>*> get_vertexes() { return this->vertexes_; }
 
-    void set_size(int size) { this->size_ = size; }
+    //если меняем size, то очищаем прошлый граф и создаем новый
+    void set_size(int size, bool timing) {
+        for (int i = 0; i < this->vertexes_.size(); i++)
+            delete this->vertexes_[i];
+        this->vertexes_.clear();
+        this->size_ = size;
+        for (int i = 0; i < size_; i++) add_vertex(i, timing);
 
-    void set_vertexes(Vertex<T>** vertexes) { this->vertexes_ = vertexes; }
+    }
+
+    //если ставим другой массив, то меняем и size(прошлый очищаем)
+    void set_vertexes(vector<Vertex<T>*> vertexes) { 
+        for (int i = 0; i < this->vertexes_.size(); i++)
+            delete this->vertexes_[i];
+        this->vertexes_.clear();
+        this->size_ = vertexes.size();
+        this->vertexes_ = vertexes; 
+    }
 
     void create_graph();
 
@@ -57,13 +72,13 @@ public:
 };
 
 template < class T >
-Graph<T>::Graph() : size_(0), vertexes_(nullptr) {}
+Graph<T>::Graph() : size_(0) {}
 
 template < class T >
 Graph<T>::Graph(int size, bool timing) {
+    if (size < 0)
+        throw exception();
     this->size_ = size;
-    this->vertexes_ = new Vertex<T> * [this->size_];
-    for (int i = 0; i < size_; i++) this->vertexes_[i] = nullptr;
     for (int i = 0; i < size_; i++) add_vertex(i, timing);
 }
 
@@ -74,8 +89,6 @@ void Graph<T>::create_graph() {
         cin >> this->size_;
         cout << endl;
     } while (this->size_ < 0);
-    this->vertexes_ = new Vertex<T> * [this->size_];
-    for (int i = 0; i < size_; i++) this->vertexes_[i] = nullptr;
     for (int i = 0; i < size_; i++) add_vertex(i, false);
 }
 
@@ -96,18 +109,16 @@ void Graph<T>::add_vertex(int i, bool timing) {
         } while (this->find_name(vert->name));
     }
     vert->color = -1;
-    this->vertexes_[i] = vert;
+    this->vertexes_.push_back(vert);
 }
 
 template < class T >
 bool Graph<T>::find_name(T name) {
-    for (int i = 0; i < this->size_; i++) {
+    for (int i = 0; i < this->vertexes_.size(); i++) {
         if (this->vertexes_[i]) {
             if (this->vertexes_[i]->name == name)
                 return true;
         }
-        else
-            break;
     }
     return false;
 }
@@ -119,8 +130,8 @@ void Graph<T>::initialization_vertexes(bool timing) {
     string strVertexes;
     for (int i = 0; i < this->size_; i++) {
         if (timing) {
-            int size = (rand() % this->size_ * rand() % this->size_) % (this->size_-1)%(this->size_/2);
-            for(int k=0; k<size-1; k++)
+            int size = (rand() % this->size_ * rand() % this->size_) % (this->size_-1);
+            for(int k=0; k<size; k++)
                 make_communication(i, rand()%(this->size_-1));
         }
         else {
@@ -213,7 +224,8 @@ void Graph<T>::print_color() {
 
 template < class T >
 void Graph<T>::clear_graph() {
-    for (int i = 0; i < this->size_; i++) {
+    for (int i = 0; i < this->vertexes_.size(); i++) {
         delete this->vertexes_[i];
     }
+    this->vertexes_.clear();
 }
