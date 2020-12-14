@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <time.h>
+#include <fstream>
 
 using namespace std;
 
@@ -214,12 +215,22 @@ void Graph<T>::print_graph() {
 
 template < class T >
 void Graph<T>::print_color() {
-    cout << endl;
-    cout << "  [COLORS]" << endl;
-    for (int i = 0; i < this->size_; i++)
-        if (vertexes_[i] != nullptr) {
-            cout << "Color {ind[" << i << "], name["<< vertexes_[i]->name <<"]} - " << vertexes_[i]->color << endl;
-        }
+    std::ofstream outData;
+    outData.open("../data.csv", ios::out);
+    if (outData.is_open()) {
+        outData << "Index" <<';'<< "Name" <<';'<< "Color" << endl;
+
+        cout << "  [COLORS]" << endl;
+        for (int i = 0; i < this->size_; i++)
+            if (vertexes_[i] != nullptr) {
+                cout << "Color {ind[" << i << "], name[" << vertexes_[i]->name << "]} - " << vertexes_[i]->color << endl;
+                outData << i <<';'<< vertexes_[i]->name <<';'<< vertexes_[i]->color << std::endl;
+            }
+        outData.close();
+    }
+    else {
+        cout << "error";
+    }
 }
 
 template < class T >
